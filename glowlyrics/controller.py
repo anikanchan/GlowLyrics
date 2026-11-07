@@ -460,6 +460,7 @@ class Controller(QObject):
         self.keep_awake.set(False)
         self.lock.close()
         self.audio.stop()
+        self.audio.join(timeout=2.0)   # lets the Mac capture stream stop cleanly
         self.watcher.stop()
         self._loader.shutdown(wait=False, cancel_futures=True)
         self.cfg.save()

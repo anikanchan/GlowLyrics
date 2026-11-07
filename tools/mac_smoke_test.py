@@ -97,4 +97,6 @@ def step3():
 QTimer.singleShot(6000, step1)  # let demo playback start and windows appear
 QTimer.singleShot(60000, lambda: (print("timeout"), app.exit(2)))
 start = time.time()
-sys.exit(app.exec())
+code = app.exec()
+print("exiting cleanly with code", code, flush=True)
+os._exit(code)

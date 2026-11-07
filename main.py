@@ -48,7 +48,15 @@ def main():
     if not ensure_accepted(cfg):
         sys.exit(0)
     ctrl = Controller(cfg)  # noqa: F841 (kept alive)
-    sys.exit(app.exec())
+    code = app.exec()
+    if sys.platform == "darwin":
+        # Skip Python's interpreter teardown on macOS: after ScreenCaptureKit / PyObjC
+        # have been used, macOS can kill the process during teardown, which shows up as
+        # "quit unexpectedly". Settings are already saved and capture stopped by quit().
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(code)
+    sys.exit(code)
 
 
 if __name__ == "__main__":

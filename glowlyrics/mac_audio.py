@@ -153,7 +153,9 @@ class MacSystemAudio:
             self._output = None
             self.running = False
         if stream is not None:
+            done = threading.Event()
             try:
-                stream.stopCaptureWithCompletionHandler_(lambda err: None)
+                stream.stopCaptureWithCompletionHandler_(lambda err: done.set())
+                done.wait(1.5)
             except Exception:
                 pass

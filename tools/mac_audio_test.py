@@ -54,9 +54,11 @@ def finish():
     print(f"audio heard: {heard} | beats detected: {det.beats} (played {int(DUR * BPM / 60)})")
     ok = cap.error == "" and det.beats >= int(DUR * BPM / 60) * 0.6
     print("BEAT TEST:", "PASS" if ok else "NOT VERIFIED (CI machine may lack audio device or permission)")
-    app.exit(0)
+    app.exit(0 if ok else 3)
 
 
 QTimer.singleShot(3000, begin)
 QTimer.singleShot(40000, lambda: (print("timeout"), app.exit(0)))
-sys.exit(app.exec())
+code = app.exec()
+print("exiting cleanly with code", code, flush=True)
+os._exit(code)

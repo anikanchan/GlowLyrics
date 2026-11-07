@@ -53,8 +53,7 @@ jobs:
         shell: bash
         run: .venv/bin/python tools/mac_smoke_test.py
 
-      - name: Beat-sync test (system audio, informational)
-        continue-on-error: true
+      - name: Beat-sync test (system audio capture + clean exit)
         timeout-minutes: 3
         shell: bash
         run: .venv/bin/python tools/mac_audio_test.py
