@@ -4,7 +4,7 @@
 # Usage:  ./build_mac_app.sh
 set -e
 cd "$(dirname "$0")"
-VERSION="1.0.0"
+VERSION="${VERSION:-1.0.0}"   # CI passes the version from the git tag
 ARCH="$(uname -m)"
 
 command -v python3 >/dev/null 2>&1 || { echo "Python 3.9+ is required (python.org)."; exit 1; }
@@ -60,7 +60,12 @@ ln -s /Applications build/dmg/Applications
 cp "tools/READ ME FIRST.txt" LICENSE.txt THIRD-PARTY-NOTICES.txt THIRD-PARTY-LICENSES.txt build/dmg/
 DMG="dist/GlowLyrics-$VERSION-mac-$ARCH.dmg"
 rm -f "$DMG"
-hdiutil create -volname GlowLyrics -srcfolder build/dmg -ov -format UDZO "$DMG" >/dev/null
+# hdiutil occasionally fails with "Resource busy" right after a build: retry a few times
+for attempt in 1 2 3 4 5; do
+  hdiutil create -volname GlowLyrics -srcfolder build/dmg -ov -format UDZO "$DMG" >/dev/null && break
+  echo "hdiutil busy, retrying ($attempt)..."; sleep 5
+done
+[ -f "$DMG" ] || { echo "DMG creation failed"; exit 1; }
 
 echo
 echo "Done!"

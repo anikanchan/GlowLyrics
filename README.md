@@ -65,7 +65,7 @@ for **Mac and Windows**, written in Python.
 ## For users: install the ready-made app
 
 ### Mac
-1. Open `GlowLyrics-1.0.0-mac-arm64.dmg` and drag **GlowLyrics** into **Applications**.
+1. Download the `.dmg` from the GitHub release (e.g. `GlowLyrics-1.0.0-mac-arm64.dmg`), open it, and drag **GlowLyrics** into **Applications**.
 2. Open GlowLyrics from Applications.
 3. **If macOS says it can't be opened:** go to **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**.
    You only need to do this once.
@@ -76,7 +76,7 @@ for **Mac and Windows**, written in Python.
 > The Mac app is built for Apple silicon (M1 or newer).
 
 ### Windows
-1. Unzip the `GlowLyrics` folder anywhere, for example in Documents.
+1. Download the `.zip` from the GitHub release (e.g. `GlowLyrics-1.0.0-windows-x64.zip`) and unzip it anywhere, for example in Documents.
 2. Double-click **GlowLyrics.exe**. If Windows SmartScreen appears, click **More info → Run anyway**.
 3. Read and **Accept** the License Agreement.
 4. A **♪** icon appears in the system tray at the bottom right. Click `^` if it's hidden.
@@ -113,7 +113,31 @@ python main.py --debug    verbose logging
 
 The person you share with doesn't need Python.
 
-### Mac → `.app` + `.dmg`
+### Easiest: let GitHub build it (Mac + Windows at once)
+This repository has a GitHub Actions workflow, `.github/workflows/build.yml`, that builds both
+apps on GitHub's own Mac and Windows machines. You don't need to build anything yourself.
+
+**Publish a release:** tag a version and push the tag:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+In about 10–15 minutes, the repository's **Releases** page has a new release with:
+- `GlowLyrics-1.0.0-mac-arm64.dmg`
+- `GlowLyrics-1.0.0-windows-x64.zip`
+
+For the next version, bump the tag (`v1.0.1`, `v1.1.0`, …). The version number in the file names comes from the tag.
+
+**Test build without a release:** on GitHub, go to **Actions → Build GlowLyrics → Run workflow**.
+When it finishes, download the files from the run's **Artifacts** section.
+
+> While this repository is private, only people with access to it can download from Releases.
+> To share with anyone, download the files and send them directly, or publish releases from a public repository.
+> On private repositories, GitHub counts each macOS build minute as 10 minutes of your free Actions allowance.
+
+### Build locally
+
+#### Mac → `.app` + `.dmg`
 Run this on a Mac:
 ```bash
 cd ~/Workspace/GlowLyric
@@ -130,7 +154,7 @@ The app has its own icon, runs from the menu bar without a Dock icon, and shows 
 > confirm it once in Privacy & Security, as described above. To remove that step, sign and notarize it
 > with an Apple Developer account ($99/year).
 
-### Windows → `.exe`
+#### Windows → `.exe`
 Run this on a Windows PC:
 1. Double-click `run_windows.bat` once to set up Python packages.
 2. Double-click `build_windows_exe.bat`.
@@ -247,6 +271,7 @@ run_windows.bat              run from source on Windows
 run_linux.sh                 run from source on Linux
 build_mac_app.sh             build GlowLyrics.app + .dmg
 build_windows_exe.bat        build GlowLyrics.exe
+.github/workflows/build.yml  GitHub Actions: builds Mac .dmg + Windows .zip, publishes releases
 requirements.txt             Python packages
 LICENSE.txt                  GlowLyrics End User License Agreement
 THIRD-PARTY-NOTICES.txt      open-source components and their licenses

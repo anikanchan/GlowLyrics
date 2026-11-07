@@ -1,0 +1,122 @@
+# Copyright © 2026 Tirhut LLC. All rights reserved.
+#
+# Builds GlowLyrics for Mac (.dmg) and Windows (.zip with GlowLyrics.exe).
+#
+#   * Push a version tag (e.g. v1.0.0)  -> builds both and publishes a GitHub Release
+#   * Actions tab -> "Build GlowLyrics" -> Run workflow -> test build; files appear
+#     under the run's "Artifacts" section (no release is created)
+
+name: Build GlowLyrics
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    name: macOS (Apple silicon)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Work out version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+
+      - name: Build .app and .dmg
+        shell: bash
+        run: |
+          chmod +x build_mac_app.sh
+          ./build_mac_app.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GlowLyrics-mac
+          path: dist/GlowLyrics-*.dmg
+          if-no-files-found: error
+
+  windows:
+    name: Windows (x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Work out version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt "pyinstaller>=6.3"
+
+      - name: Licenses and icon
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python tools/gen_licenses.py THIRD-PARTY-LICENSES.txt
+          python tools/make_icns.py build/GlowLyrics.ico
+
+      - name: Build GlowLyrics.exe
+        run: >
+          python -m PyInstaller --noconfirm --windowed --name GlowLyrics
+          --icon build/GlowLyrics.ico
+          --collect-all winrt --collect-data soundcard
+          --add-data "LICENSE.txt;." --add-data "THIRD-PARTY-NOTICES.txt;."
+          --add-data "THIRD-PARTY-LICENSES.txt;."
+          main.py
+
+      - name: Package zip
+        shell: pwsh
+        run: |
+          Copy-Item LICENSE.txt, THIRD-PARTY-NOTICES.txt, THIRD-PARTY-LICENSES.txt dist/GlowLyrics/
+          Compress-Archive -Path dist/GlowLyrics -DestinationPath "dist/GlowLyrics-$env:VERSION-windows-x64.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GlowLyrics-windows
+          path: dist/GlowLyrics-*-windows-x64.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [mac, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: GlowLyrics ${{ github.ref_name }}
+          files: out/*
+          body: |
+            **GlowLyrics**: word-by-word synced lyrics plus a music-reactive screen glow.
+
+            **Mac** (Apple silicon, M1 or newer): download the `.dmg`, open it, and drag GlowLyrics into Applications.
+            If macOS says it can't be opened, go to System Settings → Privacy & Security → **Open Anyway**.
+
+            **Windows** 10/11: download the `.zip`, unzip it, and run `GlowLyrics.exe` inside the folder.
+            If SmartScreen appears, click More info → **Run anyway**.
+
+            Idea by Shriyans Raut. Copyright © 2026 Tirhut LLC. All rights reserved.
+            Use is subject to the GlowLyrics License Agreement (LICENSE.txt, included).
