@@ -46,7 +46,7 @@ for **Mac and Windows**, written in Python.
 
 **Glow**
 - A soft two-colour glow along the screen edges that slowly rotates.
-- Pulses with the beat. It listens to your computer's audio output, never the microphone.
+- Pulses with the beat. It listens to your computer's sound output, never the microphone. On a Mac this uses Apple's ScreenCaptureKit, and macOS asks once for permission. Without that permission, the glow pulses with the rhythm of the lyrics instead.
 - Adjustable thickness, glow spread, brightness, edges, and display.
 
 **Colours**
@@ -213,7 +213,7 @@ Enhanced LRC with per-word `<mm:ss.xx>` tags is supported and followed exactly.
 **Performance**
 - On a Retina Mac, drawing a frame takes about 4 ms for the glow, 1 ms for the lyrics bar, and 10 ms for Stage mode.
 - Animation runs at 30 frames per second only while something is moving. When music is paused or nothing is shown, it drops to about 5 frames per second.
-- Beat detection only listens while the beat-synced glow is on screen.
+- Beat detection only listens while the beat-synced glow is on screen. The sound is analysed in memory and immediately discarded. It's never recorded, stored or sent.
 - Memory is capped: images of rendered lyric lines are kept for at most 10 seconds and 24 MB, and the on-disk lyrics cache keeps at most 3,000 songs or 180 days.
 
 ---
@@ -228,7 +228,7 @@ Enhanced LRC with per-word `<mm:ss.xx>` tags is supported and followed exactly.
 | **Lyrics early or late** | Use the tray menu → Timing, or Settings → Lyrics → Timing offset. Positive values make lyrics appear later. |
 | **"Screen colors" shows nothing on Mac** | Give GlowLyrics Screen Recording permission in Privacy & Security. |
 | **Lyrics/glow not on the Mac lock screen** | Check Settings → Stage → "Show lyrics and glow on the lock screen". If it's on and they still don't appear, your macOS version may not allow it. |
-| **Glow doesn't pulse on Mac** | That's expected; see Notes & limitations below. The glow gently fades in and out instead. |
+| **Glow doesn't pulse with the beat on Mac** | Allow GlowLyrics in **System Settings → Privacy & Security → Screen & System Audio Recording**; Settings shows a button that opens it. Then quit and reopen GlowLyrics. Needs macOS 13 or newer. Until permission is given, the glow pulses with the lyrics' rhythm instead. |
 | **Windows: no beat pulse** | Check that sound is playing through your default output device. |
 | **Start over** | Run with `--reset`, or delete the settings folder (Settings → About → Open settings folder). |
 
@@ -238,7 +238,7 @@ Enhanced LRC with per-word `<mm:ss.xx>` tags is supported and followed exactly.
 
 - **Word timing:** most LRCLIB lyrics are timed line by line, so GlowLyrics spreads each line's words based on natural singing pace. Files with true per-word timing are followed exactly.
 - **Lock screen:** on a Mac, the lyrics and glow show on the lock screen; they're view-only and can't be clicked. Anyone near your Mac can see them, so turn this off in Settings → Stage if you'd rather not. Windows doesn't allow apps on its lock screen, so use Stage mode ("open automatically when I'm away") there instead.
-- **Beat sync on Mac:** macOS doesn't let apps hear system audio without a loopback driver such as BlackHole, so the glow fades in and out instead of pulsing. Album colours still work.
+- **Beat sync on Mac:** this needs macOS 13 or newer and the one-time "Screen & System Audio Recording" permission. macOS calls it screen recording, but GlowLyrics only uses the sound: it captures the smallest possible video (2×2 pixels) and never looks at your screen. Album colours work either way.
 - **Full-screen apps:** on a Mac, the lyrics and glow show over full-screen apps. On Windows, a full-screen video may cover them for up to 2 seconds before GlowLyrics comes back on top. Exclusive full-screen games can still cover them.
 - **Settings location:**
   - Windows: `%APPDATA%\GlowLyrics`
@@ -256,7 +256,8 @@ glowlyrics/
   media.py                   what's playing (Windows media API / Mac helper / Linux MPRIS / demo)
   lyrics.py                  LRC parsing, per-word timing, LRCLIB client, disk cache
   colors.py                  album art lookup and colour palette extraction
-  audio.py                   system-audio beat detection (Windows / Linux)
+  audio.py                   beat detection (Windows/Linux loopback, Mac via mac_audio.py)
+  mac_audio.py               macOS system-audio capture (ScreenCaptureKit)
   glow.py                    screen-edge glow
   lyrics_view.py             the 5 lyric styles, floating bar, Stage mode, image cache
   emoji_map.py               word → emoji map for the Visual style
@@ -269,6 +270,7 @@ tools/
   make_icns.py               generates the app icon (.iconset for Mac, .ico for Windows)
   gen_licenses.py            collects full open-source license texts at build time
   mac_smoke_test.py          CI check: window behaviour and lock screen on a real Mac
+  mac_audio_test.py          CI check: beat detection from system audio on a real Mac
   licenses/                  official LGPL-3.0 / GPL-3.0 texts
   READ ME FIRST.txt          note for Mac users, included in the .dmg
 run_mac.command              run from source on Mac
