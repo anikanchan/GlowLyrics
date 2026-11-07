@@ -37,8 +37,10 @@ for **Mac and Windows**, written in Python.
   - **Lens:** a fisheye scroll. Lines grow as they reach the centre.
   - **Wall:** the lines stack into a wall that drifts in 3D.
   - **Visual:** emoji appear beside matching words, with a large faint emoji behind the current line.
+- **Always on top:** the lyrics bar and glow stay above other apps. On a Mac they also appear on every desktop (Space) and over full-screen apps.
+- **Lock screen (Mac):** the lyrics and glow keep showing on your Mac's lock screen. You can turn this off in Settings → Stage.
 - **Stage mode:** full-screen lyrics over the blurred album art, with a clock and a now-playing card.
-  It can open automatically when you're away from the computer, like lyrics on a lock screen.
+  It can open automatically when you're away from the computer.
 - Lyrics come from [LRCLIB](https://lrclib.net), a free community lyrics database, or from your own `.lrc` files.
 - A timing offset fixes lyrics that run early or late.
 
@@ -186,7 +188,7 @@ The `.exe` has the GlowLyrics icon. The license and third-party notices are bund
 - **Lyrics:** style, font, size, background, timing offset, local lyrics folder.
 - **Glow:** on/off, beat or idle animation, thickness, spread, brightness, edges, display.
 - **Colors:** Album art, Screen colors, or Manual. "Copy current song's colours" saves the current palette as your manual colours.
-- **Stage:** auto-open when idle (after X minutes), clock on/off, keep the display awake while music plays.
+- **Stage:** auto-open when idle (after X minutes), clock on/off, keep the display awake while music plays, show on the lock screen (Mac).
 - **About:** version, credits, copyright, License Agreement, third-party notices, open-source licenses.
 
 **Stage mode:** press any key or click to exit. If it opened automatically, moving the mouse also closes it.
@@ -225,6 +227,7 @@ Enhanced LRC with per-word `<mm:ss.xx>` tags is supported and followed exactly.
 | **No lyrics found** | Not every song has synced lyrics on LRCLIB. Add your own `.lrc` file, or try again later; misses are retried after a day. Settings → About → **Clear lyrics cache** forces a fresh lookup. |
 | **Lyrics early or late** | Use the tray menu → Timing, or Settings → Lyrics → Timing offset. Positive values make lyrics appear later. |
 | **"Screen colors" shows nothing on Mac** | Give GlowLyrics Screen Recording permission in Privacy & Security. |
+| **Lyrics/glow not on the Mac lock screen** | Check Settings → Stage → "Show lyrics and glow on the lock screen". If it's on and they still don't appear, your macOS version may not allow it. |
 | **Glow doesn't pulse on Mac** | That's expected; see Notes & limitations below. The glow gently fades in and out instead. |
 | **Windows: no beat pulse** | Check that sound is playing through your default output device. |
 | **Start over** | Run with `--reset`, or delete the settings folder (Settings → About → Open settings folder). |
@@ -234,9 +237,9 @@ Enhanced LRC with per-word `<mm:ss.xx>` tags is supported and followed exactly.
 ## Notes & limitations
 
 - **Word timing:** most LRCLIB lyrics are timed line by line, so GlowLyrics spreads each line's words based on natural singing pace. Files with true per-word timing are followed exactly.
-- **Lock screen:** apps can't draw on the real Windows or macOS lock screen. Stage mode with "open automatically when I'm away" is the stand-in.
+- **Lock screen:** on a Mac, the lyrics and glow show on the lock screen; they're view-only and can't be clicked. Anyone near your Mac can see them, so turn this off in Settings → Stage if you'd rather not. Windows doesn't allow apps on its lock screen, so use Stage mode ("open automatically when I'm away") there instead.
 - **Beat sync on Mac:** macOS doesn't let apps hear system audio without a loopback driver such as BlackHole, so the glow fades in and out instead of pulsing. Album colours still work.
-- **Full-screen games and videos** may cover the glow.
+- **Full-screen apps:** on a Mac, the lyrics and glow show over full-screen apps. On Windows, a full-screen video may cover them for up to 2 seconds before GlowLyrics comes back on top. Exclusive full-screen games can still cover them.
 - **Settings location:**
   - Windows: `%APPDATA%\GlowLyrics`
   - macOS: `~/Library/Application Support/GlowLyrics`
@@ -261,9 +264,11 @@ glowlyrics/
   legal.py                   first-launch License Agreement, legal document viewer
   config.py                  saved settings
   system.py                  keep display awake, idle time, app folders
+  window_tweaks.py           on-top behaviour: all desktops, full-screen apps, Mac lock screen
 tools/
   make_icns.py               generates the app icon (.iconset for Mac, .ico for Windows)
   gen_licenses.py            collects full open-source license texts at build time
+  mac_smoke_test.py          CI check: window behaviour and lock screen on a real Mac
   licenses/                  official LGPL-3.0 / GPL-3.0 texts
   READ ME FIRST.txt          note for Mac users, included in the .dmg
 run_mac.command              run from source on Mac
