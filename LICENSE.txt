@@ -1,0 +1,121 @@
+GLOWLYRICS END USER LICENSE AGREEMENT
+
+Copyright © 2026 Tirhut LLC. All rights reserved.
+Effective date: November 7, 2026
+
+PLEASE READ THIS AGREEMENT CAREFULLY. BY INSTALLING, COPYING, OR USING GLOWLYRICS
+(THE "SOFTWARE"), YOU AGREE TO BE BOUND BY THIS AGREEMENT. IF YOU DO NOT AGREE,
+DO NOT INSTALL OR USE THE SOFTWARE.
+
+1. OWNERSHIP
+The Software, including its source code, design, icons, and documentation, is owned
+by Tirhut LLC ("Licensor") and is protected by copyright and other intellectual
+property laws. The Software is licensed, not sold. Licensor keeps all rights not
+expressly granted to you in this Agreement.
+
+2. LICENSE GRANT
+Subject to this Agreement, Licensor grants you a free, personal, non-exclusive,
+non-transferable, revocable license to install and use the Software on devices you
+own or control, for personal and non-commercial purposes. You may give an unmodified
+copy of the official installer to others for free, provided this Agreement and all
+copyright notices are included and you do not charge for it.
+
+3. RESTRICTIONS
+You may not, and may not allow anyone else to:
+  (a) sell, rent, lease, sublicense, or otherwise commercially exploit the Software;
+  (b) modify, translate, adapt, or create derivative works of the Software;
+  (c) reverse engineer, decompile, or disassemble the Software, except to the extent
+      applicable law expressly permits this despite this restriction (including as
+      permitted for the open-source components described in Section 9);
+  (d) remove, alter, or hide any copyright, trademark, or other notices;
+  (e) distribute the Software under a different name, or claim it as your own; or
+  (f) use the Software in violation of any law or of the terms of any third-party
+      service it connects to.
+
+4. THIRD-PARTY CONTENT AND SERVICES
+The Software displays content it obtains from third parties, including song titles,
+artist information, album artwork, and lyrics, from your music player and from
+external services such as LRCLIB and the iTunes Search API. Licensor does not own,
+control, verify, or endorse that content, and is not responsible for its accuracy,
+availability, legality, or for any claims relating to it. Third-party content
+remains the property of its respective owners. Your use of third-party services is
+subject to their own terms. These services may change or stop at any time.
+
+5. NO AFFILIATION
+GlowLyrics is an independent product. It is not affiliated with, sponsored by, or
+endorsed by Spotify, Apple, Microsoft, or any music service, record label, or
+publisher. All product names and trademarks belong to their respective owners and
+are used only to describe compatibility.
+
+6. DISCLAIMER OF WARRANTIES
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITH ALL FAULTS AND WITHOUT
+WARRANTY OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, LICENSOR
+DISCLAIMS ALL WARRANTIES, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING ANY
+IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE,
+NON-INFRINGEMENT, ACCURACY, AND QUIET ENJOYMENT. LICENSOR DOES NOT WARRANT THAT THE
+SOFTWARE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE, OR COMPATIBLE WITH YOUR DEVICE,
+OR THAT ANY CONTENT IT DISPLAYS WILL BE ACCURATE OR AVAILABLE.
+
+7. LIMITATION OF LIABILITY
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR OR ITS
+MEMBERS, MANAGERS, OFFICERS, EMPLOYEES, CONTRIBUTORS, OR AGENTS BE LIABLE FOR ANY
+INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR
+ANY LOSS OF DATA, PROFITS, REVENUE, GOODWILL, OR USE, OR FOR DEVICE DAMAGE, SYSTEM
+FAILURE, OR DISPLAY ISSUES, ARISING OUT OF OR RELATING TO THE SOFTWARE OR THIS
+AGREEMENT, HOWEVER CAUSED AND UNDER ANY THEORY OF LIABILITY, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES. LICENSOR'S TOTAL LIABILITY FOR ALL CLAIMS WILL NOT
+EXCEED THE GREATER OF THE AMOUNT YOU PAID FOR THE SOFTWARE OR FIVE U.S. DOLLARS
+(US $5.00). Some jurisdictions do not allow certain exclusions or limitations, so
+some of the above may not apply to you; in that case they apply to the fullest
+extent permitted.
+
+8. INDEMNITY
+You agree to defend, indemnify, and hold harmless Licensor and its members,
+managers, officers, employees, contributors, and agents from any claims, damages,
+losses, and expenses (including reasonable attorneys' fees) arising from your
+misuse of the Software or your violation of this Agreement or of any law or
+third-party right.
+
+9. OPEN-SOURCE COMPONENTS
+The Software includes open-source components that are licensed to you under their
+own licenses, not this Agreement. These include Qt for Python (PySide6) and Qt,
+which are licensed under the GNU Lesser General Public License version 3 (LGPLv3).
+Nothing in this Agreement limits your rights under those licenses, including your
+right to replace or modify the LGPL-licensed libraries. See
+THIRD-PARTY-NOTICES.txt for the list of components, their licenses, and where to
+obtain their source code.
+
+10. PRIVACY
+The Software runs on your device. It does not collect personal information, and it
+does not send any data to Licensor. To find lyrics and artwork, it sends the title
+and artist of the song you are playing to the third-party services in Section 4.
+On Windows and Linux, it analyses your computer's audio output on your device to
+detect the beat; that audio is never recorded, stored, or transmitted. The
+Software never uses your microphone.
+
+11. TERMINATION
+This license ends automatically if you breach this Agreement. You may end it at any
+time by deleting the Software. On termination, you must stop using the Software and
+delete all copies. Sections 1, 3 through 8, and 12 through 14 survive termination.
+
+12. EXPORT
+You agree to comply with all applicable export control and sanctions laws when
+using or transferring the Software.
+
+13. GOVERNING LAW AND VENUE
+This Agreement is governed by the laws of the State of Texas, United States,
+without regard to its conflict-of-laws rules. Any dispute will be resolved
+exclusively in the state or federal courts located in Collin County, Texas, and
+you consent to the jurisdiction of those courts.
+
+14. GENERAL
+This Agreement is the entire agreement between you and Licensor regarding the
+Software. If any provision is found unenforceable, it will be enforced to the
+maximum extent possible and the rest will remain in effect. Licensor's failure to
+enforce any provision is not a waiver. You may not assign this Agreement;
+Licensor may. Licensor may update this Agreement for future versions of the
+Software.
+
+Credits: original idea by Shriyans Raut.
+
+Tirhut LLC

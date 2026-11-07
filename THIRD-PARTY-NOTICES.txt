@@ -1,0 +1,71 @@
+GLOWLYRICS - THIRD-PARTY NOTICES
+
+Copyright © 2026 Tirhut LLC. All rights reserved.
+
+GlowLyrics includes the open-source software listed below. Each component is
+licensed under its own terms, shown here. These licenses, not the GlowLyrics
+End User License Agreement, govern your use of these components. The full license
+texts are in THIRD-PARTY-LICENSES.txt, which is included with the app.
+
+-------------------------------------------------------------------------------
+Qt for Python (PySide6, shiboken6) and the Qt libraries
+  License: GNU Lesser General Public License v3 (LGPLv3)
+  Copyright: The Qt Company Ltd. and other contributors
+  Source:  https://code.qt.io/cgit/pyside/pyside-setup.git/
+           https://download.qt.io/official_releases/
+  LGPL notice: GlowLyrics uses the Qt libraries unmodified, as separate dynamic
+  libraries (in GlowLyrics.app/Contents/Frameworks on macOS, and inside the
+  application folder on Windows). You may replace them with your own compatible
+  versions, as the LGPL permits. You can get the corresponding source code for the
+  exact versions shipped from the links above, or by writing to Tirhut LLC; it
+  will be provided for at least three years from distribution.
+
+requests
+  License: Apache License 2.0
+  Source:  https://github.com/psf/requests
+
+urllib3, idna, certifi, charset-normalizer (used by requests)
+  Licenses: MIT (urllib3, charset-normalizer), BSD-3-Clause (idna),
+            Mozilla Public License 2.0 (certifi)
+  Source:  https://github.com/urllib3/urllib3  https://github.com/kjd/idna
+           https://github.com/certifi/python-certifi
+           https://github.com/jawah/charset_normalizer
+
+Pillow
+  License: MIT-CMU (HPND)
+  Source:  https://github.com/python-pillow/Pillow
+
+NumPy
+  License: BSD-3-Clause (bundled components under their own compatible licenses)
+  Source:  https://github.com/numpy/numpy
+
+SoundCard (Windows and Linux only)
+  License: BSD-3-Clause
+  Source:  https://github.com/bastibe/SoundCard
+
+cffi, pycparser (used by SoundCard)
+  Licenses: MIT-0 / MIT (cffi), BSD-3-Clause (pycparser)
+
+PyWinRT (winrt-* packages, Windows only)
+  License: MIT
+  Source:  https://github.com/pywinrt/pywinrt
+
+Python runtime
+  License: Python Software Foundation License Version 2
+  Source:  https://www.python.org/
+
+PyInstaller bootloader (used to package the app)
+  License: GPLv2 with a special exception that allows it to be used in
+           applications under any license
+  Source:  https://github.com/pyinstaller/pyinstaller
+
+-------------------------------------------------------------------------------
+ONLINE SERVICES (not bundled; used at runtime)
+
+LRCLIB (https://lrclib.net) - a community lyrics database. Lyrics belong to
+their respective rights holders.
+iTunes Search API (Apple) - used to look up album artwork. Artwork belongs to its
+respective rights holders.
+
+GlowLyrics is not affiliated with or endorsed by any of the projects or services
+above.

@@ -1,0 +1,26 @@
+GlowLyrics for Mac
+==================
+
+INSTALL
+1. Drag GlowLyrics into the Applications folder.
+2. Open GlowLyrics from Applications.
+
+IF MACOS SAYS IT CAN'T BE OPENED
+This app isn't from the App Store, so macOS asks you to confirm once:
+  - Open System Settings > Privacy & Security, scroll down, and click "Open Anyway" next to GlowLyrics.
+  - Or, on older macOS versions: right-click (Control-click) the app > Open > Open.
+
+USING IT
+- A ♪ icon appears in the menu bar (top right). There's no Dock icon.
+- Play a song in Spotify or Apple Music. When macOS asks whether GlowLyrics may control Spotify or Music, click OK. That's how it reads the song and playback position.
+- Click the ♪ icon for settings, lyrics styles, full-screen Stage mode, and Quit.
+- Drag the lyrics bar to move it. Scroll over it to resize the text. Double-click it for full screen.
+
+Lyrics come from LRCLIB (lrclib.net), a free community lyrics database.
+
+LICENSE
+When you first open GlowLyrics, you'll be asked to accept the License Agreement (LICENSE.txt).
+GlowLyrics is provided "as is", without warranty. It includes open-source software. See
+THIRD-PARTY-NOTICES.txt and THIRD-PARTY-LICENSES.txt.
+
+Copyright © 2026 Tirhut LLC. All rights reserved.

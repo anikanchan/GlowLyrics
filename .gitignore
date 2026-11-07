@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Build output
+build/
+dist/
+*.spec
+THIRD-PARTY-LICENSES.txt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
