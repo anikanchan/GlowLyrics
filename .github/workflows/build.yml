@@ -49,17 +49,21 @@ jobs:
           ./build_mac_app.sh
 
       - name: Smoke test (window behaviour + lock screen)
+        timeout-minutes: 3
         shell: bash
         run: .venv/bin/python tools/mac_smoke_test.py
 
       - name: Beat-sync test (system audio, informational)
         continue-on-error: true
+        timeout-minutes: 3
         shell: bash
         run: .venv/bin/python tools/mac_audio_test.py
 
       - name: Launch test (built app starts)
         shell: bash
         run: |
+          plutil -p dist/GlowLyrics.app/Contents/Info.plist | grep -E "LSUIElement|NSAudioCapture|NSAppleEvents|NSHumanReadable"
+          [ "$(plutil -extract NSAudioCaptureUsageDescription raw dist/GlowLyrics.app/Contents/Info.plist)" != "" ]
           ./dist/GlowLyrics.app/Contents/MacOS/GlowLyrics --demo > launch.log 2>&1 &
           PID=$!
           sleep 15

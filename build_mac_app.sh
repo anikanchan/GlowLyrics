@@ -38,9 +38,8 @@ echo "==> Building GlowLyrics.app"
 
 APP="dist/GlowLyrics.app"
 PL="$APP/Contents/Info.plist"
-pset() {  # key type value
-  /usr/libexec/PlistBuddy -c "Set :$1 $3" "$PL" 2>/dev/null || \
-  /usr/libexec/PlistBuddy -c "Add :$1 $2 $3" "$PL"
+pset() {  # key type value  (plutil handles quotes/apostrophes safely)
+  plutil -replace "$1" -"$2" "$3" "$PL"
 }
 pset LSUIElement bool true                      # menu-bar app, no Dock icon
 pset CFBundleShortVersionString string "$VERSION"

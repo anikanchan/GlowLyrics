@@ -347,7 +347,8 @@ class Controller(QObject):
         if self.timer.interval() != want:
             self.timer.setInterval(want)
         # Beat detection only while the beat-synced glow is on screen.
-        want_audio = glow_on and self._playing and cfg["glow_animation"] == "Beat"
+        want_audio = (glow_on and self._playing and cfg["glow_animation"] == "Beat"
+                      and not cfg["demo"])  # demo mode simulates the beat
         if want_audio and sys.platform == "darwin" and not cfg["mac_audio_explained"]:
             cfg.set("mac_audio_explained", True)
             if self.tray:
