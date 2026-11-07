@@ -117,19 +117,17 @@ The person you share with doesn't need Python.
 This repository has a GitHub Actions workflow, `.github/workflows/build.yml`, that builds both
 apps on GitHub's own Mac and Windows machines. You don't need to build anything yourself.
 
-**Publish a release:** tag a version and push the tag:
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-In about 10–15 minutes, the repository's **Releases** page has a new release with:
-- `GlowLyrics-1.0.0-mac-arm64.dmg`
-- `GlowLyrics-1.0.0-windows-x64.zip`
+**Publish a release (no commands needed):**
+1. On GitHub, open the repository → **Actions** → **Build GlowLyrics** → **Run workflow**.
+2. Type a version such as `1.0.1` and click **Run workflow**.
+3. About 5–10 minutes later, the repository's **Releases** page has the new version with:
+   - `GlowLyrics-1.0.1-mac-arm64.dmg`
+   - `GlowLyrics-1.0.1-windows-x64.zip`
 
-For the next version, bump the tag (`v1.0.1`, `v1.1.0`, …). The version number in the file names comes from the tag.
+Use a new version number each time (`1.0.2`, `1.1.0`, …). Pushing a tag such as `v1.0.1` from your Mac works too.
 
-**Test build without a release:** on GitHub, go to **Actions → Build GlowLyrics → Run workflow**.
-When it finishes, download the files from the run's **Artifacts** section.
+**Test build without a release:** do the same but leave the version empty. The files then
+appear in that run's **Artifacts** section instead of a release.
 
 > While this repository is private, only people with access to it can download from Releases.
 > To share with anyone, download the files and send them directly, or publish releases from a public repository.
