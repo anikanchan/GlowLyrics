@@ -44,6 +44,7 @@ DEFAULTS = {
     "stage_idle_minutes": 5,
     "stage_clock": True,
     "keep_awake": True,
+    "lock_screen": True,       # Mac: show lyrics + glow on the lock screen
     # Misc
     "demo": False,
     "first_run": True,

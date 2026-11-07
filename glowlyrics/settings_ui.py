@@ -221,6 +221,17 @@ class SettingsWindow(QWidget):
         f.addRow("After", mins)
         f.addRow(self.check("stage_clock", "Show clock and date"))
         f.addRow(self.check("keep_awake", "Keep display awake while music plays"))
+        from . import window_tweaks
+        lock = self.check("lock_screen", "Show lyrics and glow on the lock screen (Mac)")
+        if not window_tweaks.lock_screen_supported():
+            lock.setEnabled(False)
+            lock.setToolTip("Only available on macOS. Windows doesn't allow apps on the lock screen.")
+        f.addRow(lock)
+        note = QLabel("The lyrics bar and glow always stay on top of other apps, on every "
+                      "desktop and over full-screen apps.")
+        note.setWordWrap(True)
+        note.setStyleSheet("color:gray;font-size:11px;")
+        f.addRow(note)
         return w
 
     def _about_tab(self):

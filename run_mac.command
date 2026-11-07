@@ -7,12 +7,13 @@ if ! command -v python3 >/dev/null 2>&1; then
   read -r -p "Press Enter to close"
   exit 1
 fi
-if [ ! -f .venv/installed.ok ]; then
-  echo "First run - installing GlowLyrics. This takes a minute or two..."
+# (re)install when requirements.txt changed since the last install
+if ! cmp -s requirements.txt .venv/installed.ok; then
+  echo "Installing/updating GlowLyrics components. This takes a minute or two..."
   python3 -m venv .venv && \
   .venv/bin/python -m pip install --upgrade pip && \
   .venv/bin/python -m pip install -r requirements.txt && \
-  touch .venv/installed.ok || { echo "Setup failed."; read -r -p "Press Enter to close"; exit 1; }
+  cp requirements.txt .venv/installed.ok || { echo "Setup failed."; read -r -p "Press Enter to close"; exit 1; }
 fi
 nohup .venv/bin/python main.py "$@" >/dev/null 2>&1 &
 echo "GlowLyrics started - look for the ♪ icon in the menu bar. You can close this window."

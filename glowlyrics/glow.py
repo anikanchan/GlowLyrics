@@ -20,6 +20,8 @@ class EdgeStrip(QWidget):
                             Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        # macOS: don't hide when another app is in front
+        self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.setWindowTitle("GlowLyrics glow")
 

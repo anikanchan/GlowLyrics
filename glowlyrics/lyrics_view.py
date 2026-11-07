@@ -633,6 +633,8 @@ class LyricsOverlay(QWidget):
         self.setWindowTitle("GlowLyrics")
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        # macOS: don't hide when another app is in front
+        self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
         self.grip = QSizeGrip(self)
         self.grip.resize(18, 18)
         self._save_timer = QTimer(self, singleShot=True, interval=500, timeout=self._save_geom)

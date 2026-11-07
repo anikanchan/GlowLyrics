@@ -9,12 +9,13 @@ ARCH="$(uname -m)"
 
 command -v python3 >/dev/null 2>&1 || { echo "Python 3.9+ is required (python.org)."; exit 1; }
 
-if [ ! -f .venv/installed.ok ]; then
+# (re)install when requirements.txt changed since the last install
+if ! cmp -s requirements.txt .venv/installed.ok; then
   echo "==> Setting up Python environment"
   python3 -m venv .venv
   .venv/bin/python -m pip install --upgrade pip
   .venv/bin/python -m pip install -r requirements.txt
-  touch .venv/installed.ok
+  cp requirements.txt .venv/installed.ok
 fi
 
 echo "==> Installing PyInstaller"

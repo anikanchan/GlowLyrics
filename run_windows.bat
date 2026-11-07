@@ -11,14 +11,16 @@ if %errorlevel%==0 set "PY=py -3"
 %PY% --version >nul 2>nul
 if errorlevel 1 goto nopython
 
-if not exist ".venv\installed.ok" (
-    echo First run - installing GlowLyrics. This takes a minute or two...
+REM (re)install when requirements.txt changed since the last install
+fc /b requirements.txt ".venv\installed.ok" >nul 2>&1
+if errorlevel 1 (
+    echo Installing/updating GlowLyrics components. This takes a minute or two...
     %PY% -m venv .venv
     if errorlevel 1 goto fail
     ".venv\Scripts\python.exe" -m pip install --upgrade pip
     ".venv\Scripts\python.exe" -m pip install -r requirements.txt
     if errorlevel 1 goto fail
-    echo ok> ".venv\installed.ok"
+    copy /y requirements.txt ".venv\installed.ok" >nul
 )
 
 start "" ".venv\Scripts\pythonw.exe" main.py %*

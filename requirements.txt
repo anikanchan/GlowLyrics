@@ -5,6 +5,8 @@ Pillow>=10.0
 numpy>=1.24
 # System-audio beat detection (Windows / Linux)
 soundcard>=0.4.3; platform_system != "Darwin"
+# macOS: show on all desktops, over full-screen apps and on the lock screen
+pyobjc-framework-Cocoa>=10.0; platform_system == "Darwin"
 # Windows "now playing" detection
 winrt-runtime>=2.0; platform_system == "Windows"
 winrt-Windows.Foundation>=2.0; platform_system == "Windows"

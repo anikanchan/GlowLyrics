@@ -21,6 +21,7 @@ from .lyrics_view import LyricsOverlay, StageWindow
 from .media import DemoProvider, MediaWatcher, NowPlaying
 from .settings_ui import SettingsWindow
 from .system import KeepAwake, idle_seconds, sub_dir
+from . import window_tweaks
 
 log = logging.getLogger("glowlyrics")
 COLOR_KEYS = ("glow1", "glow2", "lyric", "highlight", "secondary")
@@ -72,6 +73,7 @@ class Controller(QObject):
         self._load_gen = 0
         self.stage = None
         self.keep_awake = KeepAwake()
+        self.lock = window_tweaks.LockWatcher(self._on_lock_change)
 
         self.cache_dir = sub_dir("cache")
         self.local_dir = sub_dir("lyrics")
@@ -287,12 +289,18 @@ class Controller(QObject):
         cfg = self.cfg
         has_track = bool(self.np.title)
         show_ov = cfg["show_lyrics"] and (has_track or not cfg["hide_when_idle"])
+        shown_changed = False
         if show_ov != self.overlay.isVisible():
             self.overlay.setVisible(show_ov)
+            shown_changed = True
         if show_ov:
             self.overlay.update()
         glow_on = cfg["glow_enabled"] and (self._playing or not cfg["glow_only_playing"])
+        if glow_on != self.glow.visible:
+            shown_changed = True
         self.glow.set_visible(glow_on)
+        if shown_changed:
+            self._apply_window_tweaks()  # newly shown windows: all Spaces / on top
         self.glow.tick()
         if self.stage is not None:
             self.stage.update()
@@ -307,6 +315,7 @@ class Controller(QObject):
     def _slow_tick(self):
         cfg = self.cfg
         self.keep_awake.set(cfg["keep_awake"] and self._playing)
+        self._apply_window_tweaks()  # cheap; re-asserts "on top" (e.g. after full-screen video)
         if cfg["color_mode"] == "Screen colors" and self._playing:
             try:
                 self._sample_screen()
@@ -328,10 +337,15 @@ class Controller(QObject):
             self._update_target_colors()
         elif key == "overlay_locked":
             self.overlay.apply_flags()
+            self._apply_window_tweaks()
         elif key in ("glow_thickness", "glow_spread", "glow_screen"):
             self.glow.rebuild()
+            self._apply_window_tweaks()
         elif key == "glow_edges":
             self.glow.set_visible(self.glow.visible, force=True)
+            self._apply_window_tweaks()
+        elif key == "lock_screen":
+            self._apply_window_tweaks()
         elif key == "demo":
             self.np = NowPlaying()
             self.lyrics = None
@@ -341,6 +355,17 @@ class Controller(QObject):
                      "glow_animation"):
             pass
         self._sync_menu()
+
+    # ------------------------------------------------------------------ platform window tweaks
+    def _apply_window_tweaks(self):
+        wins = [self.overlay] + list(self.glow.strips.values())
+        window_tweaks.configure(wins, locked=self.lock.locked, lock_screen=self.cfg["lock_screen"])
+
+    def _on_lock_change(self, locked):
+        """Mac screen locked/unlocked: lift the lyrics + glow above the lock screen (or back)."""
+        if locked and self.stage is not None:
+            self.stage.close()  # Stage takes keyboard focus; never put it over the lock screen
+        self._apply_window_tweaks()
 
     # ------------------------------------------------------------------ windows / actions
     def open_stage(self, auto=False):
@@ -383,6 +408,7 @@ class Controller(QObject):
         self.timer.stop()
         self.slow.stop()
         self.keep_awake.set(False)
+        self.lock.close()
         self.audio.stop()
         self.watcher.stop()
         self._loader.shutdown(wait=False, cancel_futures=True)
