@@ -52,6 +52,11 @@ jobs:
         shell: bash
         run: .venv/bin/python tools/mac_smoke_test.py
 
+      - name: Beat-sync test (system audio, informational)
+        continue-on-error: true
+        shell: bash
+        run: .venv/bin/python tools/mac_audio_test.py
+
       - name: Launch test (built app starts)
         shell: bash
         run: |

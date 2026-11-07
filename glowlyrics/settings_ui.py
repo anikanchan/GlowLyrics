@@ -294,14 +294,23 @@ class SettingsWindow(QWidget):
         needs_perm = "Automation" in (c.problem or "")
         if needs_perm:
             self.now.setText(f"<b>⚠️ Permission needed.</b><br>{c.problem}")
-        self.fix_btn.setVisible(needs_perm)
+            self._fix_url = "automation"
+            self.fix_btn.setText("Open Automation settings…")
+        elif c.audio.needs_permission and c.cfg["glow_animation"] == "Beat":
+            self._fix_url = "screen"
+            self.fix_btn.setText("Allow beat sync: open Screen & System Audio Recording settings…")
+        self.fix_btn.setVisible(needs_perm or (c.audio.needs_permission and
+                                               c.cfg["glow_animation"] == "Beat"))
         self.audio_lab.setText(c.audio.status if not c.cfg["demo"] else "Demo mode: simulated beat")
 
     def _open_automation(self):
         from PySide6.QtCore import QUrl
         from PySide6.QtGui import QDesktopServices
         from .media import AUTOMATION_SETTINGS_URL
-        QDesktopServices.openUrl(QUrl(AUTOMATION_SETTINGS_URL))
+        url = AUTOMATION_SETTINGS_URL
+        if getattr(self, "_fix_url", "") == "screen":
+            url = "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
+        QDesktopServices.openUrl(QUrl(url))
 
     def closeEvent(self, e):
         if not self.ctrl.tray:

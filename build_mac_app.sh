@@ -48,6 +48,7 @@ pset CFBundleVersion string "$VERSION"
 pset CFBundleDisplayName string GlowLyrics
 pset LSMinimumSystemVersion string 12.0
 pset NSHumanReadableCopyright string "Copyright © 2026 Tirhut LLC. All rights reserved."
+pset NSAudioCaptureUsageDescription string "GlowLyrics listens to your Mac's sound output to pulse the glow with the beat. Audio is analysed on your Mac only and never recorded or sent."
 pset NSAppleEventsUsageDescription string "GlowLyrics reads the current song and playback position from Spotify and Apple Music."
 
 echo "==> Signing (ad-hoc)"

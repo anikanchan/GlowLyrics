@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import shutil
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -73,6 +74,7 @@ class Controller(QObject):
         self._load_gen = 0
         self.stage = None
         self.keep_awake = KeepAwake()
+        self._audio_perm_told = False
         self.lock = window_tweaks.LockWatcher(self._on_lock_change)
 
         self.cache_dir = sub_dir("cache")
@@ -139,18 +141,48 @@ class Controller(QObject):
     def position(self):
         return self.raw_position() - self.cfg["offset_ms"] / 1000.0
 
+    def _real_audio(self):
+        return self.audio.available and self.audio.hearing_audio()
+
     def beat_live(self):
-        return self._playing and (self.cfg["demo"] or self.audio.available)
+        """True when the glow has something to pulse to (real audio or the lyrics' rhythm)."""
+        if not self._playing:
+            return False
+        return self.cfg["demo"] or self._real_audio() or bool(self.lyrics and self.lyrics.lines)
 
     def beat_pulse(self):
         if self.cfg["demo"]:
             return math.exp(-(self.raw_position() % 0.5) * 6)  # 120 BPM
-        return self.audio.pulse() if self.audio.available else 0.0
+        if self._real_audio():
+            return self.audio.pulse()
+        return self._lyrics_pulse()
+
+    def _lyrics_pulse(self):
+        """Fallback when system audio isn't available: pulse on each sung word,
+        a bigger pulse at the start of each line."""
+        lyr = self.lyrics
+        if not lyr or not lyr.lines:
+            return 0.0
+        t = self.position()
+        i = lyr.index_at(t)
+        if i < 0:
+            return 0.0
+        line = lyr.lines[i]
+        line_age = t - line.start
+        word_age = 99.0
+        for w in line.words:
+            if w.start <= t:
+                word_age = t - w.start
+            else:
+                break
+        return max(math.exp(-line_age * 4.0), 0.7 * math.exp(-word_age * 7.0))
 
     def audio_level(self):
         if self.cfg["demo"]:
             return 0.5 + 0.3 * math.sin(self.raw_position() * 0.7)
-        return self.audio.level if self.audio.available else 0.0
+        if self._real_audio():
+            return self.audio.level
+        return 0.35 if self.beat_live() else 0.0
 
     # ------------------------------------------------------------------ media
     def _on_problem(self, msg):
@@ -315,7 +347,19 @@ class Controller(QObject):
         if self.timer.interval() != want:
             self.timer.setInterval(want)
         # Beat detection only while the beat-synced glow is on screen.
-        self.audio.active = glow_on and self._playing and cfg["glow_animation"] == "Beat"
+        want_audio = glow_on and self._playing and cfg["glow_animation"] == "Beat"
+        if want_audio and sys.platform == "darwin" and not cfg["mac_audio_explained"]:
+            cfg.set("mac_audio_explained", True)
+            if self.tray:
+                self.tray.showMessage(
+                    "Beat sync", "To pulse with the beat, macOS will ask to let GlowLyrics capture "
+                    "system audio. Sound is analysed on your Mac only and never recorded or sent.",
+                    self.icon, 12000)
+        self.audio.active = want_audio
+        if self.audio.needs_permission and not self._audio_perm_told:
+            self._audio_perm_told = True
+            if self.tray:
+                self.tray.showMessage("Beat sync is off", self.audio.status, self.icon, 15000)
 
     def _slow_tick(self):
         cfg = self.cfg
