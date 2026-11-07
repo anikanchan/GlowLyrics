@@ -25,6 +25,10 @@ class SettingsWindow(QWidget):
         self.now.setWordWrap(True)
         self.now.setStyleSheet("padding:10px;border-radius:10px;background:rgba(127,127,127,0.12);")
         lay.addWidget(self.now)
+        self.fix_btn = QPushButton("Open Automation settings…")
+        self.fix_btn.clicked.connect(self._open_automation)
+        self.fix_btn.setVisible(False)
+        lay.addWidget(self.fix_btn)
 
         tabs = QTabWidget()
         tabs.addTab(self._lyrics_tab(), "Lyrics")
@@ -287,7 +291,17 @@ class SettingsWindow(QWidget):
         else:
             self.now.setText("<b>Nothing playing.</b> Start a song in Spotify, Apple Music or your "
                              "browser.<br><span style='color:gray'>" + (c.problem or "") + "</span>")
+        needs_perm = "Automation" in (c.problem or "")
+        if needs_perm:
+            self.now.setText(f"<b>⚠️ Permission needed.</b><br>{c.problem}")
+        self.fix_btn.setVisible(needs_perm)
         self.audio_lab.setText(c.audio.status if not c.cfg["demo"] else "Demo mode: simulated beat")
+
+    def _open_automation(self):
+        from PySide6.QtCore import QUrl
+        from PySide6.QtGui import QDesktopServices
+        from .media import AUTOMATION_SETTINGS_URL
+        QDesktopServices.openUrl(QUrl(AUTOMATION_SETTINGS_URL))
 
     def closeEvent(self, e):
         if not self.ctrl.tray:

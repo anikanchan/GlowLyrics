@@ -155,8 +155,13 @@ class Controller(QObject):
     # ------------------------------------------------------------------ media
     def _on_problem(self, msg):
         self.problem = msg
+        if not msg:
+            return  # problem resolved
         if self.tray:
-            self.tray.showMessage("GlowLyrics", msg, self.icon, 8000)
+            self.tray.showMessage("GlowLyrics needs permission" if "Automation" in msg else "GlowLyrics",
+                                  msg, self.icon, 15000)
+        if "Automation" in msg:
+            self.show_settings()  # shows the fix + a button to open the right settings page
 
     def _on_np(self, np):
         key = np.key()

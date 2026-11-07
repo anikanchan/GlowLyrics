@@ -169,15 +169,17 @@ class WindowsProvider:
 # One long-running JavaScript-for-Automation helper reports the player state twice a
 # second, instead of launching a new `osascript` process every poll (much cheaper).
 # If GlowLyrics exits, writing to the closed pipe fails and the helper ends too.
-_JXA_LOOP = r"""
+_JXA_BODY = r"""
 ObjC.import('Foundation');
 var out = $.NSFileHandle.fileHandleWithStandardOutput;
 function emit(s) {
   out.writeData($.NSString.alloc.initWithUTF8String(s + "\n").dataUsingEncoding($.NSUTF8StringEncoding));
 }
+var errors = {};
 function info(name) {
+  var app;
+  try { app = Application(name); } catch (e) { return null; }          // not installed
   try {
-    var app = Application(name);
     if (!app.running()) return null;
     var st = app.playerState();
     if (st === "stopped") return null;
@@ -186,23 +188,30 @@ function info(name) {
              position: app.playerPosition(), duration: t.duration()};
     if (name === "Spotify") { r.duration = r.duration / 1000; try { r.art = t.artworkUrl(); } catch (e) {} }
     return r;
-  } catch (e) { return null; }
+  } catch (e) { errors[name] = String(e); return null; }               // e.g. not authorised
 }
-while (true) {
+function report() {
+  errors = {};
   var a = info("Spotify"), b = info("Music");
   var pick = (a && a.state === "playing") ? a : (b && b.state === "playing") ? b : (a || b);
-  emit(JSON.stringify(pick));
-  delay(0.5);
+  return JSON.stringify({now: pick, errors: errors});
 }
 """
-
-
-_JXA_ONCE = _JXA_LOOP.split("while (true)")[0].replace(
-    "ObjC.import('Foundation');", "") + """
-var a = info("Spotify"), b = info("Music");
-var pick = (a && a.state === "playing") ? a : (b && b.state === "playing") ? b : (a || b);
-JSON.stringify(pick);
+# Long-running helper: reports twice a second. If GlowLyrics exits, writing to the
+# closed pipe fails and the helper ends too.
+_JXA_LOOP = _JXA_BODY + """
+while (true) { emit(report()); delay(0.5); }
 """
+# One-shot fallback (used only if the helper can't run).
+_JXA_ONCE = _JXA_BODY + """
+report();
+"""
+
+MAC_PERMISSION_HELP = (
+    "GlowLyrics isn't allowed to read {apps}. Open System Settings → Privacy & Security → "
+    "Automation, find GlowLyrics (or Terminal if you started it from Terminal) and turn on {apps}. "
+    "Then quit and reopen GlowLyrics.")
+AUTOMATION_SETTINGS_URL = "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation"
 
 
 class MacProvider:
@@ -216,6 +225,7 @@ class MacProvider:
         self._started = 0.0
         self._restarts = 0
         self._fallback = False
+        self.problem = ""
         self._start()
 
     def _poll_once(self):
@@ -256,11 +266,20 @@ class MacProvider:
             return NowPlaying()
         return self._parse(line, when)
 
-    @staticmethod
-    def _parse(line, when):
+    def _parse(self, line, when):
         if not line or line == "null":
             return NowPlaying()
         d = json.loads(line)
+        if isinstance(d, dict) and "now" in d:
+            errs = d.get("errors") or {}
+            denied = sorted(name for name, msg in errs.items()
+                            if "-1743" in msg or "not authori" in msg.lower()
+                            or "not allowed" in msg.lower())
+            self.problem = (MAC_PERMISSION_HELP.format(apps=" and ".join(
+                "Music" if n == "Music" else n for n in denied)) if denied else "")
+            d = d.get("now")
+            if not d:
+                return NowPlaying()
         return NowPlaying(title=d.get("title") or "", artist=d.get("artist") or "",
                           album=d.get("album") or "", duration=_num(d.get("duration")),
                           position=_num(d.get("position")), playing=d.get("state") == "playing",
@@ -344,6 +363,7 @@ class MediaWatcher(QThread):
                               "See README for requirements. Demo mode still works.")
         demo = DemoProvider()
         errors = 0
+        last_problem = ""
         while not self._stop:
             try:
                 if self.cfg["demo"]:
@@ -366,6 +386,10 @@ class MediaWatcher(QThread):
                     if provider is not None and hasattr(provider, "close"):
                         provider.close()
                     provider = make_provider()
+            problem = getattr(provider, "problem", "") if not self.cfg["demo"] else ""
+            if problem != last_problem:
+                last_problem = problem
+                self.problem.emit(problem)
             self.updated.emit(np)
             for _ in range(5):
                 if self._stop:

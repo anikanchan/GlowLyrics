@@ -222,7 +222,7 @@ Enhanced LRC with per-word `<mm:ss.xx>` tags is supported and followed exactly.
 
 | Problem | Fix |
 |---|---|
-| **"Nothing playing" on Mac** | Go to System Settings → Privacy & Security → **Automation** → GlowLyrics, and turn on Spotify and Music. Then quit GlowLyrics and open it again. |
+| **"Nothing playing" on Mac** | GlowLyrics needs the Automation permission to read Music or Spotify. If it's missing, GlowLyrics shows a "Permission needed" message with an **Open Automation settings** button. In **System Settings → Privacy & Security → Automation**, find GlowLyrics (or Terminal, if you started it from Terminal), turn on **Music** and **Spotify**, then quit and reopen GlowLyrics. If GlowLyrics isn't listed, run `tccutil reset AppleEvents com.glowlyrics.app` in Terminal, reopen it, and click **OK** when macOS asks. |
 | **Mac: "can't be opened"** | System Settings → Privacy & Security → **Open Anyway**. |
 | **No lyrics found** | Not every song has synced lyrics on LRCLIB. Add your own `.lrc` file, or try again later; misses are retried after a day. Settings → About → **Clear lyrics cache** forces a fresh lookup. |
 | **Lyrics early or late** | Use the tray menu → Timing, or Settings → Lyrics → Timing offset. Positive values make lyrics appear later. |
