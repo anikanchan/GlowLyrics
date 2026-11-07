@@ -1,5 +1,6 @@
 # Copyright © 2026 Tirhut LLC. All rights reserved.
 """Lyrics rendering (4 styles), the floating overlay window, and full-screen Stage mode."""
+import bisect
 import math
 import time
 from collections import OrderedDict
@@ -87,6 +88,8 @@ class LyricsRenderer:
         self._layouts = {}
         self._lyrics_ref = None
         self.cache = PixmapCache(self.CACHE_BYTES)
+        self._pop_words = None
+        self._pop_scroll = None
 
     # ---------------------------------------------------------------- helpers
     def font(self, px, bold=True):
@@ -292,6 +295,8 @@ class LyricsRenderer:
             self._layouts.clear()
             self.cache.clear()
             self.scroll = None
+            self._pop_words = None
+            self._pop_scroll = None
         self.cache.prune()
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
@@ -308,7 +313,9 @@ class LyricsRenderer:
         style = c.cfg["lyrics_style"]
         p.save()
         p.setClipRect(rect)
-        if style == "Lens":
+        if style == "Pop":
+            self._pop(p, rect, size, t, idx, lyr)
+        elif style == "Lens":
             self._lens(p, rect, size, t, idx, lyr)
         elif style == "Wall":
             self._wall(p, rect, size, t, idx, lyr)
@@ -402,6 +409,146 @@ class LyricsRenderer:
                            max(0.0, 0.85 - dist / half * 0.6), False)
             y += h + spacing
             i += 1
+
+    # ---------------------------------------------------------------- Pop style
+    POP_HISTORY = 5          # sung words kept on screen above the current one
+    POP_IN = 0.22            # seconds for a word's pop-in animation
+
+    def _word_pixmap(self, text, font, color, dpr):
+        """Single word rendered once; reused every frame (cheap to rotate/scale)."""
+        c = QColor(color)
+        key = ("pop-word", text, font.family(), font.pixelSize(), font.italic(), font.weight(),
+               (c.red() >> 3, c.green() >> 3, c.blue() >> 3), round(dpr, 2))
+        pm = self.cache.get(key)
+        if pm is not None:
+            return pm
+        fm = QFontMetricsF(font)
+        pad = fm.height() * 0.15
+        w, h = fm.horizontalAdvance(text) + 2 * pad + fm.height() * 0.1, fm.height() + 2 * pad
+        pm = QPixmap(max(1, math.ceil(w * dpr)), max(1, math.ceil(h * dpr)))
+        pm.setDevicePixelRatio(dpr)
+        pm.fill(Qt.GlobalColor.transparent)
+        q = QPainter(pm)
+        q.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+        q.setFont(font)
+        q.setPen(c)
+        q.drawText(QPointF(pad, pad + fm.ascent()), text)
+        q.end()
+        self.cache.put(key, pm)
+        return pm
+
+    def _emoji_pixmap(self, emo, px, dpr):
+        key = ("pop-emoji", emo, int(px), round(dpr, 2))
+        pm = self.cache.get(key)
+        if pm is None:
+            side = px * 1.3
+            pm = QPixmap(max(1, int(side * dpr)), max(1, int(side * dpr)))
+            pm.setDevicePixelRatio(dpr)
+            pm.fill(Qt.GlobalColor.transparent)
+            q = QPainter(pm)
+            q.setPen(EMOJI_PEN)
+            q.setFont(self.emoji_font(px))
+            q.drawText(QRectF(0, 0, side, side), Qt.AlignmentFlag.AlignCenter, emo)
+            q.end()
+            self.cache.put(key, pm)
+        return pm
+
+    @staticmethod
+    def _pop_look(k):
+        """A stable, varied look for word #k (size, tilt, offset, italic), so the same
+        word always looks the same while the column feels hand-placed."""
+        h = (k * 2654435761) & 0xFFFFFFFF
+        size = (0.82, 1.0, 1.0, 1.18, 1.38)[h % 5]
+        tilt = ((h >> 3) % 11 - 5) * 1.1            # -5.5 .. +5.5 degrees
+        shift = ((h >> 7) % 9 - 4) / 4.0            # -1 .. +1 (fraction of max offset)
+        italic = (h >> 11) % 4 == 0
+        return size, tilt, shift, italic
+
+    @staticmethod
+    def _ease_out_back(x):
+        c1 = 1.70158
+        c3 = c1 + 1
+        return 1 + c3 * (x - 1) ** 3 + c1 * (x - 1) ** 2
+
+    def _pop(self, p, rect, size, t, idx, lyr):
+        """One word at a time: each sung word pops in, the current one sits on a
+        coloured sticker that wipes in as it's sung, earlier words drift up and fade."""
+        cols = self.ctrl.colors
+        if self._pop_words is None:
+            self._pop_words = [w for ln in lyr.lines for w in ln.words]
+            self._pop_starts = [w.start for w in self._pop_words]
+        words = self._pop_words
+        if not words:
+            return
+        wi = bisect.bisect_right(self._pop_starts, t) - 1
+        now = time.monotonic()
+        dt = min(0.1, now - getattr(self, "_pop_last", now))
+        self._pop_last = now
+        if self._pop_scroll is None or abs(wi - self._pop_scroll) > 8:
+            self._pop_scroll = float(wi)
+        else:
+            self._pop_scroll += (wi - self._pop_scroll) * min(1.0, dt * 12)
+
+        dpr = p.device().devicePixelRatioF() if p.device() else 1.0
+        base = min(size * 1.55, rect.height() * 0.30)
+        slot = base * 1.02                       # vertical distance between stacked words
+        cx, cy = rect.center().x(), rect.center().y() + base * 0.35
+        max_shift = min(rect.width() * 0.16, base * 2.2)
+        gap = lyr.in_gap(t, idx)
+
+        if gap:
+            self.draw_dots(p, cx, cy, size, cols)
+
+        p.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+        lo = max(0, wi - self.POP_HISTORY)
+        for k in range(lo, wi + 1):
+            w = words[k]
+            age_words = wi - k                    # 0 = current word
+            sz, tilt, shift, italic = self._pop_look(k)
+            px = base * sz
+            f = QFont(self.font(px))
+            f.setItalic(italic)
+            # vertical position: the column slides up as new words arrive
+            y = cy - (self._pop_scroll - k) * slot - (base * 0.35 if gap else 0)
+            if y < rect.top() - px or y > rect.bottom() + px:
+                continue
+            fade = max(0.0, 1.0 - age_words * 0.2)
+            if gap:
+                fade *= 0.45
+            shrink = 1.0 - min(0.25, age_words * 0.05)
+            # pop-in: overshoot scale + quick fade-in
+            a = (t - w.start) / self.POP_IN
+            pop = self._ease_out_back(max(0.0, min(1.0, a))) if a < 1 else 1.0
+            op = fade * max(0.0, min(1.0, a * 2.0))
+            if op <= 0.01:
+                continue
+            current = age_words == 0 and not gap
+            text_color = cols["lyric"] if current else cols["highlight"]
+            pm = self._word_pixmap(w.text, f, text_color, dpr)
+            pw, ph = pm.width() / dpr, pm.height() / dpr
+            emo = emoji_for(w.text)
+            p.save()
+            p.translate(cx + shift * max_shift, y)
+            p.rotate(tilt)
+            sc = max(0.05, pop * shrink)
+            p.scale(sc, sc)
+            p.setOpacity(op)
+            if current:
+                # sticker box that wipes in while the word is sung
+                prog = max(0.0, min(1.0, (t - w.start) / max(0.08, w.end - w.start)))
+                box = QRectF(-pw / 2, -ph / 2 + ph * 0.08, pw, ph * 0.86)
+                p.setPen(Qt.PenStyle.NoPen)
+                p.setBrush(_alpha(cols["highlight"], 0.28))
+                p.drawRoundedRect(box, ph * 0.12, ph * 0.12)
+                p.setBrush(_alpha(cols["highlight"], 0.92))
+                p.drawRoundedRect(QRectF(box.left(), box.top(), max(1.0, box.width() * prog),
+                                         box.height()), ph * 0.12, ph * 0.12)
+            p.drawPixmap(QPointF(-pw / 2, -ph / 2), pm)
+            if emo:
+                ep = self._emoji_pixmap(emo, px * 0.62, dpr)
+                ew = ep.width() / dpr
+                p.drawPixmap(QPointF(pw / 2 + px * 0.05, -ew / 2), ep)
+            p.restore()
 
     def _lens(self, p, rect, size, t, idx, lyr):
         """Fisheye-like list: lines magnify as they approach the centre.

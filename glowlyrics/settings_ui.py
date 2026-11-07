@@ -109,8 +109,8 @@ class SettingsWindow(QWidget):
         f = QFormLayout(w)
         f.addRow(self.check("show_lyrics", "Show floating lyrics"))
         f.addRow("Style", self.combo("lyrics_style", STYLES))
-        style_help = QLabel("Karaoke: classic lines · Lens: fisheye scroll · "
-                            "Wall: 3D drifting stack · Visual: emoji beside words")
+        style_help = QLabel("Karaoke: classic lines · Pop: one word at a time · Lens: fisheye "
+                            "scroll · Wall: 3D drifting stack · Visual: emoji beside words")
         style_help.setWordWrap(True)
         style_help.setStyleSheet("color:gray;font-size:11px;")
         f.addRow("", style_help)

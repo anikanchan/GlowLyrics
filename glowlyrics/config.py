@@ -8,7 +8,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 
 from .system import app_dir
 
-STYLES = ["Karaoke", "Lens", "Wall", "Visual"]
+STYLES = ["Karaoke", "Pop", "Lens", "Wall", "Visual"]
 COLOR_MODES = ["Album art", "Screen colors", "Manual"]
 GLOW_ANIMATIONS = ["Beat", "Idle glow"]
 

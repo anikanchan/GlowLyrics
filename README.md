@@ -30,8 +30,10 @@ for **Mac and Windows**, written in Python.
 
 **Lyrics**
 - A floating lyrics bar that stays on top of other windows. Each word lights up as it's sung.
-- Four styles:
+- Five styles:
   - **Karaoke:** the current line is large, with the lines before and after it smaller.
+  - **Pop:** one word at a time. Each word pops in as it's sung with its own size and tilt,
+    the current word sits on a coloured sticker that fills in as it's sung, and earlier words drift up and fade.
   - **Lens:** a fisheye scroll. Lines grow as they reach the centre.
   - **Wall:** the lines stack into a wall that drifts in 3D.
   - **Visual:** emoji appear beside matching words, with a large faint emoji behind the current line.
@@ -253,7 +255,7 @@ glowlyrics/
   colors.py                  album art lookup and colour palette extraction
   audio.py                   system-audio beat detection (Windows / Linux)
   glow.py                    screen-edge glow
-  lyrics_view.py             the 4 lyric styles, floating bar, Stage mode, image cache
+  lyrics_view.py             the 5 lyric styles, floating bar, Stage mode, image cache
   emoji_map.py               word → emoji map for the Visual style
   settings_ui.py             settings window
   legal.py                   first-launch License Agreement, legal document viewer
