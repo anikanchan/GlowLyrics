@@ -651,7 +651,7 @@ class LyricsOverlay(QWidget):
     def apply_flags(self):
         locked = self.ctrl.cfg["overlay_locked"]
         flags = (Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint |
-                 Qt.WindowType.Tool)
+                 Qt.WindowType.Tool | Qt.WindowType.NoDropShadowWindowHint)
         if locked:
             flags |= Qt.WindowType.WindowTransparentForInput | Qt.WindowType.WindowDoesNotAcceptFocus
         vis = self.isVisible()

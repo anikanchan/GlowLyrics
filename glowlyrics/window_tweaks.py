@@ -81,6 +81,7 @@ def configure(widgets, locked=False, lock_screen=True):
                 lambda: win.setCollectionBehavior_(_CAN_JOIN_ALL_SPACES | _STATIONARY |
                                                    _IGNORES_CYCLE | _FULLSCREEN_AUXILIARY),
                 lambda: win.setHidesOnDeactivate_(False),
+                lambda: win.hasShadow() and win.setHasShadow_(False),  # shadows draw dark lines
                 lambda: win.setCanBecomeVisibleWithoutLogin_(bool(lock_screen)),
                 lambda: win.level() != level and win.setLevel_(level),
                 lambda: locked and lock_screen and win.orderFrontRegardless(),

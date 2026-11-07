@@ -49,7 +49,11 @@ def check(label, want_level):
             failures.append(f"{label}: {name}: no native window")
             continue
         beh, lvl, hides = int(nsw.collectionBehavior()), int(nsw.level()), bool(nsw.hidesOnDeactivate())
-        print(f"{label:9s} {name:12s} behavior={beh:#06x} level={lvl} hidesOnDeactivate={hides}")
+        shadow = bool(nsw.hasShadow())
+        print(f"{label:9s} {name:12s} behavior={beh:#06x} level={lvl} "
+              f"hidesOnDeactivate={hides} shadow={shadow}")
+        if shadow:
+            failures.append(f"{label}: {name}: window has a shadow (shows as dark lines)")
         if beh & WANT_BEHAVIOR != WANT_BEHAVIOR:
             failures.append(f"{label}: {name}: collection behavior {beh:#x}")
         if hides:
